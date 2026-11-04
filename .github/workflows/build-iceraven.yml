@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
+      - name: Checkout build scripts
+        uses: actions/checkout@v7
+        with:
+          path: build-scripts
+
       - name: Checkout Iceraven 2.52.0
         uses: actions/checkout@v7
         with:
@@ -29,7 +34,7 @@ jobs:
           java-version: 17
 
       - name: Apply bookmark exporter and isolated package ID
-        run: python3 patch_iceraven.py
+        run: python3 build-scripts/patch_iceraven.py
 
       - name: Install Android SDK components
         working-directory: iceraven-src
