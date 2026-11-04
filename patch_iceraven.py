@@ -80,6 +80,10 @@ g = gradle.read_text()
 if 'applicationId "io.github.forkmaintainers"' not in g:
     raise SystemExit("Could not locate app ID.")
 gradle.write_text(g.replace('applicationId "io.github.forkmaintainers"', 'applicationId "io.github.maxcosmos.iceravenexport"', 1))
+# Keep the modified app outside Iceraven's shared UID; it uses a personal build key.
+g = gradle.read_text()
+g = g.replace('"sharedUserId": "io.github.forkmaintainers.iceraven.sharedID"', '"sharedUserId": "io.github.maxcosmos.iceravenexport.sharedID"')
+gradle.write_text(g)
 
 strings = root / "app/src/main/res/values/strings.xml"
 st = strings.read_text()
