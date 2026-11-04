@@ -44,7 +44,7 @@ new = """private fun RootBookmarksOverflowMenu(store: BookmarksStore) {
                     Toast.makeText(context, "Bookmarks exported to Downloads", Toast.LENGTH_LONG).show()
                 }
                 .onFailure {
-                    Toast.makeText(context, "Bookmark export failed: \${it.localizedMessage ?: "unknown error"}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Bookmark export failed: ${it.localizedMessage ?: "unknown error"}", Toast.LENGTH_LONG).show()
                 }
         }
     }
@@ -125,7 +125,7 @@ internal suspend fun exportBookmarks(context: Context, format: BookmarkExportFor
         val content = if (format == BookmarkExportFormat.HTML) buildHtml(root) else buildJson(root).toString(2)
 
         val values = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "iceraven-bookmarks-\${System.currentTimeMillis()}.$extension")
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "iceraven-bookmarks-${System.currentTimeMillis()}.$extension")
             put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
