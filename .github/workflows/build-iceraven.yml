@@ -1,0 +1,61 @@
+name: Build Iceraven with bookmark export
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout Iceraven 2.52.0
+        uses: actions/checkout@v7
+        with:
+          repository: fork-maintainers/iceraven-browser
+          ref: iceraven-2.52.0
+          path: iceraven-src
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Apply bookmark exporter and isolated package ID
+        run: python3 patch_iceraven.py
+
+      - name: Install Android SDK components
+        working-directory: iceraven-src
+        run: ./automation/iceraven/install-sdk.sh
+
+      - name: Patch Android Components and prepare Python environment
+        working-directory: iceraven-src
+        run: |
+          ./automation/iceraven/patch_android_components.sh
+          ./automation/iceraven/setup_venv.sh
+
+      - name: Configure personal-use APK signing
+        working-directory: iceraven-src
+        run: echo "autosignReleaseWithDebugKey=" >> local.properties
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build arm64 APK
+        working-directory: iceraven-src
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-XX:MaxMetaspaceSize=4g -Xms1g -Xmx7g -XX:+HeapDumpOnOutOfMemoryError"
+        run: ./gradlew app:assembleForkRelease -PversionName=2.52.0-bookmark-export --stacktrace --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: iceraven-2.52.0-bookmark-export-arm64
+          path: iceraven-src/gradle/build/app/outputs/apk/forkRelease/app-arm64-v8a-forkRelease.apk
+          if-no-files-found: error
+          retention-days: 14
