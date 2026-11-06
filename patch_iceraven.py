@@ -6,11 +6,11 @@ text = screen.read_text()
 
 for item in ["import android.widget.Toast", "import androidx.compose.ui.platform.LocalContext"]:
     if item not in text:
-        first_import = text.find("\\nimport ")
+        first_import = text.find("\nimport ")
         if first_import == -1:
             raise SystemExit("Could not locate Kotlin import section.")
         insert_at = first_import + 1
-        text = text[:insert_at] + item + "\\n" + text[insert_at:]
+        text = text[:insert_at] + item + "\n" + text[insert_at:]
 
 old = """private fun RootBookmarksOverflowMenu(store: BookmarksStore) {
     val showMenu by remember {
