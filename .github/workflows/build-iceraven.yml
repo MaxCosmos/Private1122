@@ -57,12 +57,15 @@ jobs:
         working-directory: iceraven-src
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-XX:MaxMetaspaceSize=4g -Xms1g -Xmx7g -XX:+HeapDumpOnOutOfMemoryError"
-        run: ./gradlew app:assembleForkRelease -PversionName=2.52.0-bookmark-export --stacktrace --no-daemon
+        run: |
+          ./gradlew app:assembleForkRelease -PversionName=2.52.0-bookmark-export --stacktrace --no-daemon
+          echo "Built APK files:"
+          find app/build/outputs/apk -type f -name '*.apk' -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: iceraven-2.52.0-bookmark-export-arm64
-          path: iceraven-src/gradle/build/app/outputs/apk/forkRelease/app-arm64-v8a-forkRelease.apk
+          path: iceraven-src/app/build/outputs/apk/forkRelease/*.apk
           if-no-files-found: error
           retention-days: 14
