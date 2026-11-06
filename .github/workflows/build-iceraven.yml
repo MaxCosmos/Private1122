@@ -60,12 +60,12 @@ jobs:
         run: |
           ./gradlew app:assembleForkRelease -PversionName=2.52.0-bookmark-export --stacktrace --no-daemon
           echo "Built APK files:"
-          find app/build/outputs/apk -type f -name '*.apk' -print
+          find gradle/build/app/outputs/apk -type f -name '*.apk' -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: iceraven-2.52.0-bookmark-export-arm64
-          path: iceraven-src/app/build/outputs/apk/forkRelease/*.apk
+          path: iceraven-src/gradle/build/app/outputs/apk/
           if-no-files-found: error
           retention-days: 14
