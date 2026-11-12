@@ -48,7 +48,7 @@ jobs:
 
       - name: Configure personal-use APK signing
         working-directory: iceraven-src
-        run: echo "autosignReleaseWithDebugKey=" >> local.properties
+        run: echo "autosignReleaseWithDebugKey=true" >> local.properties
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -62,10 +62,10 @@ jobs:
           echo "Built APK files:"
           find gradle/build/app/outputs/apk -type f -name '*.apk' -print
 
-      - name: Upload APK
+      - name: Upload arm64 APK
         uses: actions/upload-artifact@v4
         with:
           name: iceraven-2.52.0-bookmark-export-arm64
-          path: iceraven-src/gradle/build/app/outputs/apk/
+          path: iceraven-src/gradle/build/app/outputs/apk/forkRelease/app-arm64-v8a-forkRelease.apk
           if-no-files-found: error
           retention-days: 14
