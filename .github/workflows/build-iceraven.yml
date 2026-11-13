@@ -46,10 +46,6 @@ jobs:
           ./automation/iceraven/patch_android_components.sh
           ./automation/iceraven/setup_venv.sh
 
-      - name: Configure personal-use APK signing
-        working-directory: iceraven-src
-        run: echo "autosignReleaseWithDebugKey=true" >> local.properties
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
@@ -62,10 +58,41 @@ jobs:
           echo "Built APK files:"
           find gradle/build/app/outputs/apk -type f -name '*.apk' -print
 
-      - name: Upload arm64 APK
+      - name: Sign and verify arm64 APK
+        working-directory: iceraven-src
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK_DIR="gradle/build/app/outputs/apk/forkRelease"
+          UNSIGNED="$APK_DIR/app-arm64-v8a-forkRelease-unsigned.apk"
+          SIGNED="$APK_DIR/app-arm64-v8a-forkRelease-signed.apk"
+          test -f "$UNSIGNED"
+
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/iceraven-debug.keystore" \
+            -storepass android -alias androiddebugkey -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -keyalg RSA -keysize 2048 -validity 10000
+
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$SDK_ROOT"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+
+          "$APKSIGNER" sign \
+            --ks "$RUNNER_TEMP/iceraven-debug.keystore" \
+            --ks-key-alias androiddebugkey \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --out "$SIGNED" "$UNSIGNED"
+
+          "$APKSIGNER" verify --verbose "$SIGNED"
+          echo "Verified signed APK: $SIGNED"
+
+      - name: Upload signed arm64 APK
         uses: actions/upload-artifact@v4
         with:
           name: iceraven-2.52.0-bookmark-export-arm64
-          path: iceraven-src/gradle/build/app/outputs/apk/forkRelease/app-arm64-v8a-forkRelease.apk
+          path: iceraven-src/gradle/build/app/outputs/apk/forkRelease/app-arm64-v8a-forkRelease-signed.apk
           if-no-files-found: error
           retention-days: 14
