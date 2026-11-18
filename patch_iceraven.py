@@ -76,6 +76,7 @@ new = """private fun RootBookmarksOverflowMenu(store: BookmarksStore) {
 }"""
 if old not in text:
     raise SystemExit("Could not locate RootBookmarksOverflowMenu.")
+text = text.replace("} else if (store.state.showBookmarksImport) {", "} else {", 1)
 screen.write_text(text.replace(old, new, 1))
 
 gradle = root / "app/build.gradle"
